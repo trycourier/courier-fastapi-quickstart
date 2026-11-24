@@ -4,8 +4,7 @@ from courier import AsyncCourier
 
 from notifications import notify_agent_run_finished
 
-# Runs live in memory for the demo. Keep them in your database: a dict is lost
-# on restart and isn't shared between workers.
+# Runs live in memory for the demo. Use your database, because a dict is lost on restart.
 RUNS: dict[str, dict] = {}
 
 
@@ -20,8 +19,7 @@ async def run_and_notify(courier: AsyncCourier, run_id: str, user_id: str, email
     try:
         summary = await run_agent(prompt)
     except Exception:
-        # A failed run notifies nobody here. Send a "run failed" message the
-        # same way if your users need one.
+        # A failed run notifies nobody. Send a "run failed" message the same way if you need one.
         RUNS[run_id]["status"] = "failed"
         raise
     RUNS[run_id].update(status="finished", summary=summary)

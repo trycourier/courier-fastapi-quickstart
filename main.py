@@ -66,8 +66,7 @@ async def signup(
     background_tasks: BackgroundTasks,
     courier: Annotated[AsyncCourier, Depends(get_courier)],
 ):
-    # Save the user in your database and use its id. A repeat signup for the
-    # same user should find that user, so its welcome key repeats too.
+    # Use your saved user's database id, so a repeat signup repeats its welcome key.
     user_id = f"user_{uuid.uuid4().hex}"
     # Runs after the response is sent, so signup never waits on Courier.
     background_tasks.add_task(send_welcome_email, courier, user_id, body.email, body.name)

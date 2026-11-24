@@ -10,12 +10,7 @@ async def send(courier: AsyncCourier, message: dict, idempotency_key: str) -> st
     try:
         response = await courier.send.message(message=message, idempotency_key=idempotency_key)
     except CourierError:
-        # This runs in a background task after the response went out, so no
-        # caller sees the error. The SDK retries twice with this key, but Courier
-        # replays a stored 4xx or 5xx for that key, so only a timeout, a
-        # connection error, or a 429 can succeed on a retry, once the key's
-        # 60-second lock clears. This demo only logs the failure. To retry those
-        # later, queue the send in a worker.
+        # A background task has no caller to raise to, so log the failure with its key.
         logger.exception("Courier send failed, idempotency key %s", idempotency_key)
         return None
     logger.info("Courier accepted %s, request id %s", idempotency_key, response.request_id)
@@ -31,8 +26,7 @@ async def send_welcome_email(courier: AsyncCourier, user_id: str, email: str, na
             "routing": {"method": "single", "channels": ["email"]},
             "data": {"name": name},
         },
-        # Covers the SDK's retries of this send. Pass your saved user's id, so a
-        # repeat signup for the same user reuses the key.
+        # Pass your saved user's id, so a repeat signup for the same user reuses the key.
         idempotency_key=f"welcome-{user_id}",
     )
 
@@ -50,7 +44,6 @@ async def notify_agent_run_finished(
             "routing": {"method": "all", "channels": ["email", "inbox"]},
             "data": {"summary": summary, "run_id": run_id},
         },
-        # One key per run. A retry returns the first response instead of
-        # notifying twice, and the next run gets a new key.
+        # One key per run, so a retry can't notify twice and the next run still sends.
         idempotency_key=f"agent-run-{run_id}-finished",
     )
