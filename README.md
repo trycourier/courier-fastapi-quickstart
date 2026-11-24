@@ -83,7 +83,7 @@ The run id is new for every run, so its key is too. A retry of one run's notific
 
 ## When a send fails
 
-The send runs after the response went out, so no caller is left to see an error. The SDK retries timeouts, connection errors, and 408, 409, 429, and 5xx responses twice with the same key. If the send still fails, `send()` logs it with the key and returns `None`, and the run's `request_id` stays `null`. Nothing retries it later. When a lost notification matters, queue the send in a worker (Celery, arq, or your platform's queue) and retry it with the same key.
+The send runs after the response went out, so no caller is left to see an error. The SDK retries timeouts, connection errors, and 408, 409, 429, and 5xx responses twice with the same key. If the send still fails, `send()` logs it with the key and returns `None`, and the run's `request_id` stays `null`. Nothing retries it later. When a lost notification matters, queue the send in a worker (Celery, arq, or your platform's queue) and retry a timeout, connection error, 429, or 409 with the same key, starting 60 seconds later. Courier replays any other error for that key.
 
 ## Adapting it to your app
 

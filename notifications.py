@@ -13,8 +13,9 @@ async def send(courier: AsyncCourier, message: dict, idempotency_key: str) -> st
         # This runs in a background task after the response went out, so no
         # caller sees the error. The SDK retries twice with this key, but Courier
         # replays a stored 4xx or 5xx for that key, so only a timeout, a
-        # connection error, or a 429 can succeed on a retry. This demo only logs
-        # the failure. To retry those later, queue the send in a worker.
+        # connection error, or a 429 can succeed on a retry, once the key's
+        # 60-second lock clears. This demo only logs the failure. To retry those
+        # later, queue the send in a worker.
         logger.exception("Courier send failed, idempotency key %s", idempotency_key)
         return None
     logger.info("Courier accepted %s, request id %s", idempotency_key, response.request_id)
