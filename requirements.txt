@@ -1,0 +1,3 @@
+fastapi[standard]~=0.165
+trycourier~=10.2
+python-dotenv~=1.2
