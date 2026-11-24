@@ -30,7 +30,7 @@ Read from `.env` next to `main.py` (python-dotenv, explicit path). Never commit 
 - Use the `trycourier` package: `from courier import AsyncCourier` in the app, `Courier` only in `first_send.py`.
 - Read the key from `COURIER_API_KEY`. Never hard-code it or return it to a client.
 - Queue sends with `BackgroundTasks.add_task`. Never await Courier before returning a response.
-- One idempotency key per event: `welcome-<user_id>` per signup, `agent-run-<run_id>-finished` per agent run.
-- A failed send is logged in `send()` and the run's `request_id` stays `None`. Nothing retries it after the SDK's own two retries.
+- One idempotency key per event: `welcome-<user_id>` per saved user, `agent-run-<run_id>-finished` per agent run.
+- A failed send is logged in `send()` and the run's `request_id` stays `None`. Nothing retries it after the SDK's two retries.
 - Take the user from `current_user()` (the session in a real app), never from the request body.
 - Don't call an email provider SDK directly. Courier routes to the providers connected in the workspace.

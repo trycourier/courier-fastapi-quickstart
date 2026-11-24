@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     # Check the key at startup, before any request does per-user work.
     api_key = os.environ.get("COURIER_API_KEY")
     if not api_key:
-        raise RuntimeError("COURIER_API_KEY is not set. Copy .env.example to .env and add your key.")
+        raise RuntimeError("COURIER_API_KEY is not set. Create .env with COURIER_API_KEY.")
     # One client for the app's lifetime, closed on shutdown.
     async with AsyncCourier(api_key=api_key) as courier:
         app.state.courier = courier
@@ -66,7 +66,8 @@ async def signup(
     background_tasks: BackgroundTasks,
     courier: Annotated[AsyncCourier, Depends(get_courier)],
 ):
-    # Save the user in your database and use its id.
+    # Save the user in your database and use its id. A repeat signup for the
+    # same user should find that user, so its welcome key repeats too.
     user_id = f"user_{uuid.uuid4().hex}"
     # Runs after the response is sent, so signup never waits on Courier.
     background_tasks.add_task(send_welcome_email, courier, user_id, body.email, body.name)

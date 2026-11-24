@@ -8,7 +8,7 @@
     "Use the trycourier package from PyPI and import it as from courier import AsyncCourier in async routes.",
     "Read COURIER_API_KEY from the environment and keep it server-side.",
     "Queue Courier sends with FastAPI BackgroundTasks so the response returns without waiting on Courier.",
-    "Pass one idempotency key per event to client.send.message: welcome-<user_id> per signup, agent-run-<run_id>-finished per agent run.",
+    "Pass one idempotency key per event to client.send.message: welcome-<user_id> per saved user, agent-run-<run_id>-finished per agent run.",
     "Notify a finished agent run by email and inbox with routing {\"method\": \"all\", \"channels\": [\"email\", \"inbox\"]}."
   ]
 }

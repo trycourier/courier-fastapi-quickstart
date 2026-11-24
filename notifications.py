@@ -11,9 +11,10 @@ async def send(courier: AsyncCourier, message: dict, idempotency_key: str) -> st
         response = await courier.send.message(message=message, idempotency_key=idempotency_key)
     except CourierError:
         # This runs in a background task after the response went out, so no
-        # caller sees the error. The SDK already retried connection errors,
-        # 429s, and 5xx responses twice with this key. This demo only logs what
-        # is left. To retry later, queue the send in a worker with the same key.
+        # caller sees the error. The SDK already retried timeouts, connection
+        # errors, and 408, 409, 429, and 5xx responses twice with this key. This
+        # demo only logs what is left. To retry later, queue the send in a
+        # worker with the same key.
         logger.exception("Courier send failed, idempotency key %s", idempotency_key)
         return None
     logger.info("Courier accepted %s, request id %s", idempotency_key, response.request_id)
@@ -29,7 +30,8 @@ async def send_welcome_email(courier: AsyncCourier, user_id: str, email: str, na
             "routing": {"method": "single", "channels": ["email"]},
             "data": {"name": name},
         },
-        # One key per signup, so a retry of this send can't email twice.
+        # Covers the SDK's retries of this send. Pass your saved user's id, so a
+        # repeat signup for the same user reuses the key.
         idempotency_key=f"welcome-{user_id}",
     )
 
